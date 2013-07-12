@@ -1,0 +1,52 @@
+Name: Meteor
+Cartridge-Short-Name: METEOR
+Cartridge-Version: '0.1'
+Compatible-Versions: ['0.1']
+Cartridge-Vendor: dpwhittaker
+Display-Name: Meteor
+Description: "Meteor is an open-source platform for building top-quality web apps in a fraction of the time, whether you're an expert developer or just getting started."
+Version: '0.6.4'
+Versions: ['0.6.4']
+License: "MIT"
+License-Url: https://github.com/meteor/meteor/blob/master/LICENSE.txt
+Vendor: Meteor Development Group
+Categories:
+  - service
+  - nodejs
+  - javascript
+  - web_framework
+Website: http://www.meteor.com
+Help-Topics:
+  "Meteor Documentation": http://docs.meteor.com
+Provides:
+  - meteor-0.6.4
+  - "meteor"
+  - "meteor(version) = 0.6.4"
+Publishes:
+  publish-http-url:
+    Type: "NET_TCP:httpd-proxy-info"
+  publish-gear-endpoint:
+    Type: "NET_TCP:gear-endpoint-info"
+Subscribes:
+  set-nosql-db-connection-info:
+    Type: "NET_TCP:nosqldb:connection-info"
+    Required: true
+  set-doc-url:
+    Type: "STRING:urlpath"
+    Required : false
+Scaling:
+  Min: 1
+  Max: -1
+Group-Overrides:
+  - components:
+    - meteor-0.6.4
+    - web_proxy
+Endpoints:
+  - Private-IP-Name:   IP
+    Private-Port-Name: PORT
+    Private-Port:      8080
+    Public-Port-Name:  PROXY_PORT
+    Mappings:
+      - Frontend:      ""
+        Backend:       ""
+        Options:       {"websocket": true}
