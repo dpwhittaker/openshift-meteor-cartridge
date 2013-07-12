@@ -330,11 +330,7 @@ var run = function () {
     _.each(__meteor_bootstrap__.startup_hooks, function (x) { x(); });
 
     // only start listening after all the startup code has run.
-<<<<<<< HEAD
-    app.listen(port, ip, function() {
-=======
-    httpServer.listen(port, function() {
->>>>>>> upstream/master
+    httpServer.listen(port, ip, function() {
       if (argv.keepalive)
         console.log("LISTENING"); // must match run.js
     });
