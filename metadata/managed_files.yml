@@ -9,3 +9,6 @@ locked_files:
 - ~/.meteor/**/*
 process_templates:
 - **/*.erb
+setup_rewritten:
+- meteor/
+- meteor/**/*
