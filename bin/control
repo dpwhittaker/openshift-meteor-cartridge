@@ -1,0 +1,159 @@
+#!/bin/bash -eu
+
+STOPTIMEOUT=10
+FMT="%a %b %d %Y %H:%M:%S GMT%z (%Z)"
+
+function is_meteor_running() {
+    if [ -f $OPENSHIFT_METEOR_PID_DIR/meteor.pid ]; then
+        meteor_pid=$( cat $OPENSHIFT_METEOR_PID_DIR/meteor.pid 2> /dev/null )
+        myid=$( id -u )
+        if `ps --pid $meteor_pid 2>&1 | grep meteor > /dev/null 2>&1`  ||  \
+           `pgrep -x meteor -u $myid > /dev/null 2>&1`; then
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
+function status() {
+    if is_meteor_running; then
+        client_result "Application is running"
+    else
+        client_result "Application is not running"
+    fi
+}
+
+function start() {
+    logf="$OPENSHIFT_METEOR_LOG_DIR/meteor.log"
+
+    pushd "$OPENSHIFT_REPO_DIR" > /dev/null
+    {
+        echo "`date +"$FMT"`: Starting application '$OPENSHIFT_APP_NAME' ..."
+        echo "    Bind IP       = $METEOR_IP"
+        echo "    Inner Bind IP = $METEOR_INNER_IP"
+        echo "    Port          = $METEOR_PORT"
+        echo "    Inner Port    = $METEOR_INNER_PORT"
+        echo "    MongoDB Port  = $METEOR_MONGO_PORT"
+        echo "    MongoDB URL   = $MONGO_URL"
+    } >> $logf
+
+    nohup $OPENSHIFT_NODEJS_DIR/meteor/meteor run --production >> $logf 2>&1 &
+
+    ret=$?
+    npid=$!
+    popd > /dev/null
+    if [ $ret -eq 0 ]; then
+        echo "$npid" > "$OPENSHIFT_METEOR_PID_DIR/meteor.pid"
+    else
+        echo "Application '$OPENSHIFT_APP_NAME' failed to start - $ret" 1>&2
+        exit $ret
+    fi
+
+}
+
+
+function stop() {
+    if [ -f $OPENSHIFT_METEOR_PID_DIR/meteor.pid ]; then
+        meteor_pid=$( cat $OPENSHIFT_METEOR_PID_DIR/meteor.pid 2> /dev/null )
+    fi
+
+    if [ -n "$meteor_pid" ]; then
+        logf="$OPENSHIFT_METEOR_LOG_DIR/meteor.log"
+        echo "`date +"$FMT"`: Stopping application '$OPENSHIFT_APP_NAME' ..." >> $logf
+        /bin/kill $meteor_pid
+        ret=$?
+        if [ $ret -eq 0 ]; then
+            TIMEOUT="$STOPTIMEOUT"
+            while [ $TIMEOUT -gt 0 ]  &&  is_meteor_running ; do
+                /bin/kill -0 "$meteor_pid" >/dev/null 2>&1 || break
+                sleep 1
+                let TIMEOUT=${TIMEOUT}-1
+            done
+        fi
+
+        # Make Meteor go down forcefully if it is still running.
+        if is_meteor_running ; then
+           killall -9 meteor > /dev/null 2>&1  ||  :
+        fi
+
+        echo "`date +"$FMT"`: Stopped Meteor application '$OPENSHIFT_APP_NAME'" >> $logf
+        rm -f $OPENSHIFT_METEOR_PID_DIR/meteor.pid
+    else
+        if `pgrep -x meteor -u $(id -u)  > /dev/null 2>&1`; then
+            echo "Warning: Application '$OPENSHIFT_APP_NAME' Meteor server exists without a pid file.  Use force-stop to kill." 1>&2
+        fi
+    fi
+}
+
+
+function restart() {
+    stop
+    start
+
+}  #  End of function  restart.
+
+function status {
+}
+
+function pre_build {
+}
+
+function build {
+}
+
+function reload {
+}
+
+function tidy {
+  client_message "Emptying log dir: $OPENSHIFT_NODEJS_LOG_DIR"
+  shopt -s dotglob
+  rm -rf $OPENSHIFT_NODEJS_LOG_DIR/*
+  rm -rf ${OPENSHIFT_NODEJS_DIR}tmp/*
+}
+
+function deploy {
+}
+
+function post_deploy {
+}
+
+function pre_snapshot {
+}
+
+function post_snapshot {
+}
+
+function pre_restore {
+}
+
+function post_restore {
+}
+
+function pre_repo_archive {
+}
+
+function update_configuration {
+}
+
+case "$1" in
+  start)                start ;;
+  stop)                 stop ;;
+  restart)              restart ;;
+  status)               status ;;
+  reload)               reload ;;
+  tidy)                 tidy ;;
+  pre-build)            pre_build ;;
+  build)                build ;;
+  deploy)               deploy ;;
+  post-deploy)          post_deploy ;;
+  pre-snapshot)         pre_snapshot ;;
+  post-snapshot)        post_snapshot ;;
+  pre-restore)          pre_restore ;;
+  post-restore)         post_restore ;;
+  pre-repo-archive)     pre_repo_archive ;;
+  update-configuration) update_configuration ;;
+  *)           exit 0
+esac
+
+exit 0

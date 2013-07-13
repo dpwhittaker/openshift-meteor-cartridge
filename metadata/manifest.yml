@@ -44,9 +44,15 @@ Group-Overrides:
 Endpoints:
   - Private-IP-Name:   IP
     Private-Port-Name: PORT
-    Private-Port:      8080
+    Private-Port:      3000
     Public-Port-Name:  PROXY_PORT
     Mappings:
       - Frontend:      ""
         Backend:       ""
         Options:       {"websocket": true}
+  - Private-IP-Name:   INNER_IP
+    Private-Port-Name: INNER_PORT
+    Private-Port:      3001
+  - Private-IP-Name:   INNER_IP
+    Private-Port-Name: MONGO_PORT
+    Private-Port:      3002
