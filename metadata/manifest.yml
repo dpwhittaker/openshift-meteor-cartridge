@@ -10,6 +10,7 @@ Versions: ['0.6.4']
 License: "MIT"
 License-Url: https://github.com/meteor/meteor/blob/master/LICENSE.txt
 Vendor: Meteor Development Group
+Source-Url: git@github.com:dpwhittaker/openshift-meteor-cartridge.git
 Categories:
   - service
   - nodejs
