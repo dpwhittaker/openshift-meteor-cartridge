@@ -16,7 +16,7 @@ Categories:
   - javascript
   - web_framework
 Website: http://www.meteor.com
-Source-Url: git@github.com:dpwhittaker/openshift-meteor-cartridge.git
+Source-Url: https://github.com/dpwhittaker/openshift-meteor-cartridge.git
 Help-Topics:
   "Meteor Documentation": http://docs.meteor.com
 Provides:
