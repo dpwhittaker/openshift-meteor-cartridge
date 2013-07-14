@@ -38,7 +38,7 @@ function start() {
         echo "    MongoDB URL   = $MONGO_URL"
     } >> $logf
 
-    nohup $OPENSHIFT_NODEJS_DIR/meteor/meteor run --production >> $logf 2>&1 &
+    nohup $OPENSHIFT_NODEJS_DIR/bin/meteor/meteor run --production >> $logf 2>&1 &
 
     ret=$?
     npid=$!
